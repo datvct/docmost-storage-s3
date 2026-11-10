@@ -16,6 +16,9 @@ services:
     extra_hosts:
       # cho phép container gọi tới Postgres/MinIO đang chạy trên host
       - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - nesthouse # chung network với nesthouse-backend-postgres-1
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -26,6 +29,13 @@ services:
     restart: unless-stopped
     volumes:
       - redis_data:/data
+
+networks:
+  nesthouse:
+    external: true
+    # tên network của container postgres, kiểm tra bằng:
+    # docker inspect nesthouse-backend-postgres-1 -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+    name: nesthouse-backend_default
 
 volumes:
   redis_data:
