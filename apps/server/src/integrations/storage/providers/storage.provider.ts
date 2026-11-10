@@ -51,6 +51,7 @@ export const storageDriverConfigProvider = {
             endpoint: environmentService.getAwsS3Endpoint(),
             bucket: environmentService.getAwsS3Bucket(),
             baseUrl: environmentService.getAwsS3Url(),
+            prefix: environmentService.getAwsS3Prefix(),
             forcePathStyle: environmentService.getAwsS3ForcePathStyle(),
             credentials: undefined,
           },

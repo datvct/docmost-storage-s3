@@ -92,23 +92,23 @@ export class EnvironmentService {
   }
 
   getAwsS3AccessKeyId(): string {
-    return this.configService.get<string>('AWS_S3_ACCESS_KEY_ID');
+    return this.configService.get<string>('AWS_S3_ACCESS_KEY_ID') || this.configService.get<string>('S3_ACCESS_KEY');
   }
 
   getAwsS3SecretAccessKey(): string {
-    return this.configService.get<string>('AWS_S3_SECRET_ACCESS_KEY');
+    return this.configService.get<string>('AWS_S3_SECRET_ACCESS_KEY') || this.configService.get<string>('S3_SECRET_KEY');
   }
 
   getAwsS3Region(): string {
-    return this.configService.get<string>('AWS_S3_REGION');
+    return this.configService.get<string>('AWS_S3_REGION') || this.configService.get<string>('S3_REGION');
   }
 
   getAwsS3Bucket(): string {
-    return this.configService.get<string>('AWS_S3_BUCKET');
+    return this.configService.get<string>('AWS_S3_BUCKET') || this.configService.get<string>('S3_BUCKET');
   }
 
   getAwsS3Endpoint(): string {
-    return this.configService.get<string>('AWS_S3_ENDPOINT');
+    return this.configService.get<string>('AWS_S3_ENDPOINT') || this.configService.get<string>('S3_ENDPOINT');
   }
 
   getAwsS3ForcePathStyle(): boolean {
@@ -119,7 +119,14 @@ export class EnvironmentService {
   }
 
   getAwsS3Url(): string {
-    return this.configService.get<string>('AWS_S3_URL');
+    return this.configService.get<string>('AWS_S3_URL') || this.configService.get<string>('S3_PUBLIC_URL');
+  }
+
+  getAwsS3Prefix(): string {
+    return (
+      this.configService.get<string>('AWS_S3_PREFIX') ||
+      this.configService.get<string>('S3_PREFIX')
+    );
   }
 
   getAzureStorageAccountName(): string {

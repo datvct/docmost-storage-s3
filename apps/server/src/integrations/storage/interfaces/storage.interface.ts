@@ -20,6 +20,7 @@ export interface S3StorageConfig
   endpoint: string; // Enforce endpoint
   bucket: string; // Enforce bucket
   baseUrl?: string; // Optional CDN URL for assets
+  prefix?: string; // Optional key prefix inside the bucket, e.g. "vivoo"
 }
 
 export interface AzureStorageConfig {

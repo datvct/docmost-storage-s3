@@ -32,6 +32,13 @@ export class S3Driver implements StorageDriver {
     this.s3Client = new S3Client(this.config as any);
   }
 
+  // Prepend the optional key prefix (e.g. "vivoo/") so Docmost objects live
+  // under a folder of a shared bucket.
+  private key(filePath: string): string {
+    const prefix = (this.config.prefix ?? '').replace(/^\/+|\/+$/g, '');
+    return prefix ? `${prefix}/${filePath}` : filePath;
+  }
+
   async upload(filePath: string, file: Buffer | Readable): Promise<void> {
     try {
       const contentType = getMimeType(filePath);
@@ -40,7 +47,7 @@ export class S3Driver implements StorageDriver {
         client: this.s3Client,
         params: {
           Bucket: this.config.bucket,
-          Key: filePath,
+          Key: this.key(filePath),
           Body: file,
           ContentType: contentType,
         },
@@ -75,7 +82,7 @@ export class S3Driver implements StorageDriver {
         client: clientToUse,
         params: {
           Bucket: this.config.bucket,
-          Key: filePath,
+          Key: this.key(filePath),
           Body: file,
           ContentType: contentType,
         },
@@ -96,7 +103,7 @@ export class S3Driver implements StorageDriver {
     try {
       if (await this.exists(fromFilePath)) {
         // CopySource must be URL-encoded (non-ASCII file names, spaces, "+").
-        const encodedPath = fromFilePath
+        const encodedPath = this.key(fromFilePath)
           .split('/')
           .map(encodeURIComponent)
           .join('/');
@@ -104,7 +111,7 @@ export class S3Driver implements StorageDriver {
           new CopyObjectCommand({
             Bucket: this.config.bucket,
             CopySource: `${this.config.bucket}/${encodedPath}`,
-            Key: toFilePath,
+            Key: this.key(toFilePath),
           }),
         );
       }
@@ -117,7 +124,7 @@ export class S3Driver implements StorageDriver {
     try {
       const command = new GetObjectCommand({
         Bucket: this.config.bucket,
-        Key: filePath,
+        Key: this.key(filePath),
       });
 
       const response = await this.s3Client.send(command);
@@ -132,7 +139,7 @@ export class S3Driver implements StorageDriver {
     try {
       const command = new GetObjectCommand({
         Bucket: this.config.bucket,
-        Key: filePath,
+        Key: this.key(filePath),
       });
 
       const response = await this.s3Client.send(command);
@@ -150,7 +157,7 @@ export class S3Driver implements StorageDriver {
     try {
       const command = new GetObjectCommand({
         Bucket: this.config.bucket,
-        Key: filePath,
+        Key: this.key(filePath),
         Range: `bytes=${range.start}-${range.end}`,
       });
 
@@ -166,7 +173,7 @@ export class S3Driver implements StorageDriver {
     try {
       const command = new HeadObjectCommand({
         Bucket: this.config.bucket,
-        Key: filePath,
+        Key: this.key(filePath),
       });
 
       await this.s3Client.send(command);
@@ -179,13 +186,13 @@ export class S3Driver implements StorageDriver {
     }
   }
   getUrl(filePath: string): string {
-    return `${this.config.baseUrl ?? this.config.endpoint}/${this.config.bucket}/${filePath}`;
+    return `${this.config.baseUrl ?? this.config.endpoint}/${this.config.bucket}/${this.key(filePath)}`;
   }
 
   async getSignedUrl(filePath: string, expiresIn: number): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.config.bucket,
-      Key: filePath,
+      Key: this.key(filePath),
     });
     return await getSignedUrl(this.s3Client, command, { expiresIn });
   }
@@ -194,7 +201,7 @@ export class S3Driver implements StorageDriver {
     try {
       const command = new DeleteObjectCommand({
         Bucket: this.config.bucket,
-        Key: filePath,
+        Key: this.key(filePath),
       });
 
       await this.s3Client.send(command);
